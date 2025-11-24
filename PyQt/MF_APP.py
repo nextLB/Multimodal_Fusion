@@ -15,6 +15,7 @@ class MultimodalFusionAPP(QMainWindow):
         """初始化主窗口"""
         super().__init__()
 
+        # 初始化UI界面
         self.init_ui()
 
 
@@ -23,11 +24,10 @@ class MultimodalFusionAPP(QMainWindow):
         """初始化UI界面"""
         self.setWindowTitle("多模态融合APP")
         self.setGeometry(300, 200, 1000, 800)  # 设置窗口位置和大小
-        # 设置样式
-        self.setStyleSheet(css.COMPLETE_STYLE)
 
         # 创建选项卡
         self.tab_widget = QTabWidget()
+
         # 创建选项卡
         self.main_tab = self.create_main_tab()
         self.settings_tab = self.create_settings_tab()
@@ -35,6 +35,9 @@ class MultimodalFusionAPP(QMainWindow):
         self.tab_widget.addTab(self.main_tab, "主界面")
         # 设置界面的选项卡
         self.tab_widget.addTab(self.settings_tab, "设置")
+
+        # 设置样式
+        self.setStyleSheet(css.get_stylesheet())  # 应用样式表
 
         # 关键：将选项卡设置为主窗口的中央部件
         self.setCentralWidget(self.tab_widget)
