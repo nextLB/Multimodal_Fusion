@@ -9,8 +9,7 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QTabWidget, QVB
 # 导入自定义模块
 sys.path.append('..')
 import CSS.main_css as main_css
-import CSS.visual_css as visual_css
-import CSS.voice_css as voice_css
+import CSS.scroll_css as scroll_css
 
 from visual_model_window import VisualModelWindow
 from voice_model_window import VoiceModelWindow
@@ -56,30 +55,7 @@ class MultimodalFusionAPP(QMainWindow):
         scroll_area.setWidget(widget)
 
         # 设置滚动区域样式（可选）
-        scroll_area.setStyleSheet("""
-            QScrollArea {
-                border: none;
-                background-color: transparent;
-            }
-            QScrollBar:vertical {
-                border: none;
-                background: #f0f0f0;
-                width: 10px;
-                margin: 0px;
-            }
-            QScrollBar::handle:vertical {
-                background: #c0c0c0;
-                min-height: 20px;
-                border-radius: 5px;
-            }
-            QScrollBar::handle:vertical:hover {
-                background: #a0a0a0;
-            }
-            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
-                border: none;
-                background: none;
-            }
-        """)
+        scroll_area.setStyleSheet(scroll_css.BASE_SCROLL)
 
         return scroll_area
 
@@ -107,34 +83,6 @@ class MultimodalFusionAPP(QMainWindow):
         multimodal_group = self.create_multimodal_model_group()
         main_layout.addWidget(multimodal_group)
 
-        # 添加一些示例内容来演示滚动功能（在实际使用中可以删除）
-        demo_label = QLabel("更多功能区域（示例内容）")
-        demo_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        demo_label.setStyleSheet("font-size: 18px; font-weight: bold; margin: 20px; color: #7f8c8d;")
-        main_layout.addWidget(demo_label)
-
-        # 添加一些示例按钮来展示滚动效果
-        demo_layout = QHBoxLayout()
-        for i in range(5):
-            demo_btn = QPushButton(f"示例功能 {i + 1}")
-            demo_btn.setStyleSheet("""
-                QPushButton {
-                    background-color: #ecf0f1;
-                    border: 2px solid #bdc3c7;
-                    border-radius: 10px;
-                    padding: 15px;
-                    font-size: 14px;
-                    font-weight: bold;
-                    color: #2c3e50;
-                }
-                QPushButton:hover {
-                    background-color: #d5dbdb;
-                    border: 2px solid #95a5a6;
-                }
-            """)
-            demo_btn.setFixedSize(150, 80)
-            demo_layout.addWidget(demo_btn)
-        main_layout.addLayout(demo_layout)
 
         main_layout.addStretch()
 
@@ -210,6 +158,14 @@ class MultimodalFusionAPP(QMainWindow):
             self.open_voice_inference_analysis_window
         )
         layout.addWidget(self.voice_inference_analysis_btn)
+
+        # 语音控制按钮
+        self.voice_control_btn = self.create_icon_button(
+            "./icons/voice_control.png",
+            "语音控制",
+            self.open_voice_control_window
+        )
+        layout.addWidget(self.voice_control_btn)
 
         group.setLayout(layout)
         return group
@@ -389,6 +345,11 @@ class MultimodalFusionAPP(QMainWindow):
 
     def open_voice_inference_analysis_window(self):
         """打开语音模型推理历史数据分析窗口"""
+        # 待实现
+        pass
+
+    def open_voice_control_window(self):
+        """打开语音控制窗口"""
         # 待实现
         pass
 
