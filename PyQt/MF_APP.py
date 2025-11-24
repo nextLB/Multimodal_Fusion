@@ -4,7 +4,7 @@ import sys
 from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QIcon, QPixmap
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QTabWidget, QVBoxLayout, QLabel, QPushButton, QDialog,
-                             QHBoxLayout, QGridLayout, QGroupBox)
+                             QHBoxLayout, QGridLayout, QGroupBox, QScrollArea)  # 添加了 QScrollArea
 
 # 导入自定义模块
 sys.path.append('..')
@@ -33,7 +33,7 @@ class MultimodalFusionAPP(QMainWindow):
         # 创建选项卡
         self.tab_widget = QTabWidget()
 
-        # 创建选项卡
+        # 创建选项卡 - 现在使用带滚动区域的方法
         self.main_tab = self.create_main_tab()
         self.settings_tab = self.create_settings_tab()
         # 主控制界面的选项卡
@@ -47,12 +47,47 @@ class MultimodalFusionAPP(QMainWindow):
         # 将选项卡设置为主窗口的中央部件
         self.setCentralWidget(self.tab_widget)
 
-    def create_main_tab(self):
-        """创建主界面选项卡"""
-        tab = QWidget()
+    def create_scroll_area(self, widget):
+        """创建滚动区域并添加部件"""
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)  # 允许部件调整大小
+        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)  # 需要时显示垂直滚动条
+        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)  # 需要时显示水平滚动条
+        scroll_area.setWidget(widget)
 
-        # 创建主垂直布局
-        main_layout = QVBoxLayout()
+        # 设置滚动区域样式（可选）
+        scroll_area.setStyleSheet("""
+            QScrollArea {
+                border: none;
+                background-color: transparent;
+            }
+            QScrollBar:vertical {
+                border: none;
+                background: #f0f0f0;
+                width: 10px;
+                margin: 0px;
+            }
+            QScrollBar::handle:vertical {
+                background: #c0c0c0;
+                min-height: 20px;
+                border-radius: 5px;
+            }
+            QScrollBar::handle:vertical:hover {
+                background: #a0a0a0;
+            }
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+                border: none;
+                background: none;
+            }
+        """)
+
+        return scroll_area
+
+    def create_main_tab(self):
+        """创建主界面选项卡 - 现在支持滚动"""
+        # 创建内容部件
+        content_widget = QWidget()
+        main_layout = QVBoxLayout(content_widget)
 
         # 欢迎标签
         label = QLabel("欢迎使用多模态融合APP")
@@ -72,9 +107,40 @@ class MultimodalFusionAPP(QMainWindow):
         multimodal_group = self.create_multimodal_model_group()
         main_layout.addWidget(multimodal_group)
 
+        # 添加一些示例内容来演示滚动功能（在实际使用中可以删除）
+        demo_label = QLabel("更多功能区域（示例内容）")
+        demo_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        demo_label.setStyleSheet("font-size: 18px; font-weight: bold; margin: 20px; color: #7f8c8d;")
+        main_layout.addWidget(demo_label)
+
+        # 添加一些示例按钮来展示滚动效果
+        demo_layout = QHBoxLayout()
+        for i in range(5):
+            demo_btn = QPushButton(f"示例功能 {i + 1}")
+            demo_btn.setStyleSheet("""
+                QPushButton {
+                    background-color: #ecf0f1;
+                    border: 2px solid #bdc3c7;
+                    border-radius: 10px;
+                    padding: 15px;
+                    font-size: 14px;
+                    font-weight: bold;
+                    color: #2c3e50;
+                }
+                QPushButton:hover {
+                    background-color: #d5dbdb;
+                    border: 2px solid #95a5a6;
+                }
+            """)
+            demo_btn.setFixedSize(150, 80)
+            demo_layout.addWidget(demo_btn)
+        main_layout.addLayout(demo_layout)
+
         main_layout.addStretch()
-        tab.setLayout(main_layout)
-        return tab
+
+        # 将内容部件放入滚动区域
+        scroll_area = self.create_scroll_area(content_widget)
+        return scroll_area
 
     def create_visual_model_group(self):
         """创建视觉模型功能区"""
@@ -222,17 +288,73 @@ class MultimodalFusionAPP(QMainWindow):
         return widget
 
     def create_settings_tab(self):
-        """创建设置选项卡"""
-        tab = QWidget()
-        layout = QVBoxLayout()
+        """创建设置选项卡 - 现在支持滚动"""
+        # 创建内容部件
+        content_widget = QWidget()
+        layout = QVBoxLayout(content_widget)
 
         label = QLabel("系统设置")
         label.setStyleSheet("font-size: 24px; font-weight: bold; margin: 20px;")
         layout.addWidget(label)
+
+        # 添加一些设置选项来演示滚动功能
+        settings_groups = [
+            ("通用设置", ["主题设置", "语言设置", "默认路径"]),
+            ("模型设置", ["默认模型", "模型保存路径", "自动更新"]),
+            ("数据设置", ["数据缓存", "数据备份", "清理设置"]),
+            ("高级设置", ["日志级别", "性能优化", "实验性功能"]),
+            ("关于", ["版本信息", "帮助文档", "检查更新"])
+        ]
+
+        for group_name, options in settings_groups:
+            group_box = QGroupBox(group_name)
+            group_layout = QVBoxLayout()
+
+            for option in options:
+                option_widget = QWidget()
+                option_layout = QHBoxLayout(option_widget)
+
+                option_label = QLabel(option)
+                option_label.setStyleSheet("font-size: 14px; padding: 8px;")
+
+                # 添加一些示例控件
+                if option in ["主题设置", "语言设置"]:
+                    combo_box = QPushButton("选择...")  # 简化示例，实际可以用QComboBox
+                    combo_box.setStyleSheet("padding: 5px 10px;")
+                    option_layout.addWidget(option_label)
+                    option_layout.addStretch()
+                    option_layout.addWidget(combo_box)
+                elif option in ["默认路径", "模型保存路径"]:
+                    path_btn = QPushButton("浏览...")
+                    path_btn.setStyleSheet("padding: 5px 10px;")
+                    option_layout.addWidget(option_label)
+                    option_layout.addStretch()
+                    option_layout.addWidget(path_btn)
+                else:
+                    checkbox = QPushButton("启用")  # 简化示例，实际可以用QCheckBox
+                    checkbox.setStyleSheet("padding: 5px 10px;")
+                    option_layout.addWidget(option_label)
+                    option_layout.addStretch()
+                    option_layout.addWidget(checkbox)
+
+                group_layout.addWidget(option_widget)
+
+            group_box.setLayout(group_layout)
+            group_box.setStyleSheet("""
+                QGroupBox {
+                    font-weight: bold;
+                    font-size: 16px;
+                    margin-top: 10px;
+                    padding-top: 10px;
+                }
+            """)
+            layout.addWidget(group_box)
+
         layout.addStretch()
 
-        tab.setLayout(layout)
-        return tab
+        # 将内容部件放入滚动区域
+        scroll_area = self.create_scroll_area(content_widget)
+        return scroll_area
 
     # 以下是所有功能按钮的点击事件处理函数
     def open_visual_model_window(self):
