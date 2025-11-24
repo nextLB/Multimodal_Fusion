@@ -17,7 +17,6 @@
 import sys
 import os
 import subprocess
-from pathlib import Path
 
 from PyQt6.QtCore import QThread, pyqtSignal
 
