@@ -1,4 +1,4 @@
-# CSS/css.py
+# CSS/main_css.py
 # 多模态融合APP的样式定义 - Qt兼容版本
 
 # 主样式表
@@ -423,3 +423,5 @@ def get_minimal_stylesheet():
         str: 极简版样式表字符串
     """
     return MINIMAL_STYLESHEET
+
+
