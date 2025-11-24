@@ -22,7 +22,7 @@
 
 启动配置好的python虚拟环境，来到项目的PyQt文件夹下，可运行如下命令
 
-    python select_running.py
+    python MF_APP.py
 
 然后选择指定程序进行运行即可
 
