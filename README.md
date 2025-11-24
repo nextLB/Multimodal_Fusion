@@ -8,10 +8,13 @@
 
 ### 完全手动配置
 
-    pip install pyqt6 -i https://pypi.tuna.tsinghua.edu.cn/simple
+    pip3 install pyqt6 -i https://pypi.tuna.tsinghua.edu.cn/simple
 
+    pip3 install torch torchvision --index-url https://download.pytorch.org/whl/cu126
 
+    pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple ultralytics
 
+    pip3 install pyinstaller -i https://pypi.tuna.tsinghua.edu.cn/simple
 
 
 
