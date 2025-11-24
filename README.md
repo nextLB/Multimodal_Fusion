@@ -16,7 +16,9 @@
 
     pip3 install pyinstaller -i https://pypi.tuna.tsinghua.edu.cn/simple
 
+    pip3 install pyaudio speechrecognition -i https://pypi.tuna.tsinghua.edu.cn/simple
 
+    pip3 install torch torchaudio openai-whisper whisperx
 
 ## GUI层面去运行
 
