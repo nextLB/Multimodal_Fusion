@@ -1,12 +1,25 @@
 #!/usr/bin/env python3
 """
 现代化PyQt脚本运行器 - 主程序
+
+运行机理：
+1. 程序从main()函数开始执行，创建QApplication实例
+2. 创建ModernScriptRunner主窗口类实例并显示
+3. 用户通过GUI界面选择Python脚本文件
+4. 点击运行按钮后，通过ScriptRunnerThread在独立线程中执行脚本
+5. 实时捕获并显示脚本输出，更新进度信息
+6. 提供扩展功能如结果分析、脚本历史记录等
+
+入口过程：
+1. if __name__ == "__main__": 检查
+2. 调用main()函数
+3. 创建QApplication和主窗口
+4. 进入Qt事件循环
 """
 
 import sys
 import os
 import datetime
-
 
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QHBoxLayout, QPushButton, QTextEdit, QLabel,
@@ -23,7 +36,19 @@ from core.extensions import ExtensionManager, ResultAnalyzer, ScriptManager, Pro
 
 
 class ModernScriptRunner(QMainWindow):
+    """
+    主窗口类 - 负责整个应用程序的GUI界面和主要逻辑
+
+    功能：
+    - 提供现代化的用户界面
+    - 管理脚本的选择、运行和停止
+    - 实时显示脚本输出
+    - 集成扩展功能
+    - 跟踪执行进度
+    """
+
     def __init__(self):
+        """初始化主窗口"""
         super().__init__()
 
         # 初始化扩展管理器
@@ -37,19 +62,19 @@ class ModernScriptRunner(QMainWindow):
         self.init_ui()
 
         # 当前状态
-        self.script_runner = None
-        self.current_script_path = None
-        self.output_history = []
+        self.script_runner = None  # 脚本运行线程实例
+        self.current_script_path = None  # 当前选中的脚本路径
+        self.output_history = []  # 输出历史记录
 
     def setup_extensions(self):
-        """设置扩展"""
+        """设置和注册扩展功能"""
         self.extension_manager.register_extension("result_analyzer", ResultAnalyzer())
         self.extension_manager.register_extension("script_manager", ScriptManager())
 
     def init_ui(self):
         """初始化现代化UI界面"""
         self.setWindowTitle("Python脚本运行器 - 现代化界面")
-        self.setGeometry(300, 200, 1000, 800)
+        self.setGeometry(300, 200, 1000, 800)  # 设置窗口位置和大小
 
         # 设置样式
         self.setStyleSheet(css.COMPLETE_STYLE)
@@ -213,7 +238,7 @@ class ModernScriptRunner(QMainWindow):
         # 输出文本区域
         self.output_text = QTextEdit()
         self.output_text.setReadOnly(True)
-        self.output_text.setFont(QFont("Courier New", 10))
+        self.output_text.setFont(QFont("Courier New", 10))  # 使用等宽字体便于查看输出
         layout.addWidget(self.output_text)
 
         return frame
@@ -226,12 +251,12 @@ class ModernScriptRunner(QMainWindow):
 
         self.run_btn = QPushButton("运行脚本")
         self.run_btn.clicked.connect(self.run_script)
-        self.run_btn.setEnabled(False)
+        self.run_btn.setEnabled(False)  # 初始状态下禁用
 
         self.stop_btn = QPushButton("停止运行")
         self.stop_btn.setObjectName("stopButton")
         self.stop_btn.clicked.connect(self.stop_script)
-        self.stop_btn.setEnabled(False)
+        self.stop_btn.setEnabled(False)  # 初始状态下禁用
 
         layout.addWidget(self.run_btn)
         layout.addWidget(self.stop_btn)
@@ -256,7 +281,7 @@ class ModernScriptRunner(QMainWindow):
         if file_path:
             self.current_script_path = file_path
             self.script_path_label.setText(file_path)
-            self.run_btn.setEnabled(True)
+            self.run_btn.setEnabled(True)  # 选择脚本后启用运行按钮
             self.status_label.setText(f"已选择脚本: {os.path.basename(file_path)}")
             self.clear_output()
             self.append_output(f"已加载脚本: {file_path}")
@@ -308,7 +333,7 @@ class ModernScriptRunner(QMainWindow):
         """停止脚本运行"""
         if self.script_runner and self.script_runner.isRunning():
             self.script_runner.stop()
-            self.script_runner.wait(2000)  # 等待2秒
+            self.script_runner.wait(2000)  # 等待2秒让线程安全退出
             self.append_output("\n*** 用户请求停止执行 ***")
             self.update_progress(0, "执行被用户中断")
 
@@ -414,6 +439,7 @@ class ModernScriptRunner(QMainWindow):
 
 
 def main():
+    """主函数 - 应用程序入口点"""
     # 创建应用
     app = QApplication(sys.argv)
 
@@ -431,3 +457,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
