@@ -10,10 +10,12 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QTabWidget, QVB
 sys.path.append('..')
 import CSS.main_css as main_css
 import CSS.scroll_css as scroll_css
+import CSS.reinforcement_learning_css as reinforcement_learning_css
 
 from visual_model_window import VisualModelWindow
 from voice_model_window import VoiceModelWindow
 from voice_control_window import VoiceControlWindow
+
 
 
 
@@ -84,6 +86,10 @@ class MultimodalFusionAPP(QMainWindow):
         # 创建语音模型功能区
         voice_group = self.create_voice_model_group()
         main_layout.addWidget(voice_group)
+
+        # 创建强化学习模型功能区
+        reinforcement_learning_group = self.create_reinforcement_learning_model_group()
+        main_layout.addWidget(reinforcement_learning_group)
 
         # 创建多模态融合模型功能区
         multimodal_group = self.create_multimodal_model_group()
@@ -175,6 +181,43 @@ class MultimodalFusionAPP(QMainWindow):
 
         group.setLayout(layout)
         return group
+
+    def create_reinforcement_learning_model_group(self):
+        """创建强化学习模型功能区"""
+        group = QGroupBox("强化学习模型")
+        group.setStyleSheet(reinforcement_learning_css.MAIN_REINFORCEMENT_LEARNING_STYLE)
+
+        layout = QHBoxLayout()
+        layout.setSpacing(40)
+        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        # 强化学习模型主功能按钮
+        self.reinforcement_learning_btn = self.create_icon_button(
+            "./icons/reinforcement_learning_icon.png",
+            "强化学习模型",
+            self.open_reinforcement_learning_window
+        )
+        layout.addWidget(self.reinforcement_learning_btn)
+
+        # 强化学习模型训练分析按钮
+        self.reinforcement_learning_analysis_btn = self.create_icon_button(
+            "./icons/training_reinforcement_learning_analysis_icon.png",
+            "训练数据分析",
+            self.open_reinforcement_learning_analysis_window
+        )
+        layout.addWidget(self.reinforcement_learning_analysis_btn)
+
+        # 强化学习模型推理分析按钮
+        self.reinforcement_learning_inference_analysis_btn = self.create_icon_button(
+            "./icons/inference_reinforcement_learning_analysis_icon.png",
+            "推理数据分析",
+            self.open_reinforcement_learning_inference_analysis_window
+        )
+        layout.addWidget(self.reinforcement_learning_inference_analysis_btn)
+
+        group.setLayout(layout)
+        return group
+
 
     def create_multimodal_model_group(self):
         """创建多模态融合模型功能区"""
@@ -328,6 +371,21 @@ class MultimodalFusionAPP(QMainWindow):
         """打开语音模型窗口"""
         self.popup_window = VoiceModelWindow(self)
         self.popup_window.show()
+
+    def open_reinforcement_learning_window(self):
+        """打开强化学习模型窗口"""
+        # 待实现
+        pass
+
+    def open_reinforcement_learning_analysis_window(self):
+        """打开强化学习模型训练历史数据分析窗口"""
+        # 待实现
+        pass
+
+    def open_reinforcement_learning_inference_analysis_window(self):
+        """打开强化学习模型推理历史数据分析窗口"""
+        # 待实现
+        pass
 
     def open_multimodal_fusion_window(self):
         """打开多模态融合模型窗口"""

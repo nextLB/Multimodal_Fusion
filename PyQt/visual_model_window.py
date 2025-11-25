@@ -70,6 +70,13 @@ class VisualModelWindow(QDialog):
         clear_btn.setStyleSheet(visual_css.EXAMPLE_CLEAR_BUTTON)
         button_layout.addWidget(clear_btn)
 
+        # 添加进入视觉模型详细的选择界面的按钮
+        self.detailed_model_btn = QPushButton("进入视觉模型的详细信息界面")
+        # TODO: 链接一个新界面或者一个新的选项卡之类的
+
+        button_layout.addWidget(self.detailed_model_btn)
+
+
         layout.addLayout(button_layout)
 
         # 添加当前运行程序显示标签
@@ -263,4 +270,8 @@ class VisualModelWindow(QDialog):
             except:
                 pass
         event.accept()
+
+    # TODO: 链接到一个新界面或者一个新的选项卡之类的
+    def link_detail_visual_model(self):
+        pass
 
