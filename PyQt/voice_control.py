@@ -46,10 +46,6 @@ class VoiceControlWindow(QDialog):
         input_group = self.create_input_group()
         main_layout.addWidget(input_group)
 
-        # 创建输出显示区域
-        output_group = self.create_output_group()
-        main_layout.addWidget(output_group)
-
         # 添加按钮区域
         button_layout = self.create_button_layout()
         main_layout.addLayout(button_layout)
@@ -96,67 +92,9 @@ class VoiceControlWindow(QDialog):
         group.setLayout(layout)
         return group
 
-    def create_output_group(self):
-        """创建输出显示区域"""
-        group = QGroupBox("执行结果")
-        group.setStyleSheet("""
-            QGroupBox {
-                font-weight: bold;
-                font-size: 16px;
-                margin: 10px;
-                padding: 15px;
-                border: 2px solid #bdc3c7;
-                border-radius: 8px;
-            }
-        """)
-
-        layout = QVBoxLayout()
-
-        # 输出文本框
-        self.output_text = QTextEdit()
-        self.output_text.setReadOnly(True)
-        self.output_text.setStyleSheet("""
-            QTextEdit {
-                font-size: 12px;
-                padding: 10px;
-                border: 1px solid #7f8c8d;
-                border-radius: 5px;
-                margin: 5px;
-                background-color: #ecf0f1;
-            }
-        """)
-
-        # 添加欢迎信息
-        self.output_text.append("语音控制界面已启动！")
-        self.output_text.append("请输入指令编号并按回车执行...")
-        self.output_text.append("-" * 50)
-
-        layout.addWidget(self.output_text)
-
-        group.setLayout(layout)
-        return group
-
     def create_button_layout(self):
         """创建按钮布局"""
         layout = QHBoxLayout()
-
-        # 清空按钮
-        clear_btn = QPushButton("清空输出")
-        clear_btn.setStyleSheet("""
-            QPushButton {
-                font-size: 14px;
-                padding: 8px 15px;
-                background-color: #e74c3c;
-                color: white;
-                border: none;
-                border-radius: 5px;
-                margin: 5px;
-            }
-            QPushButton:hover {
-                background-color: #c0392b;
-            }
-        """)
-        clear_btn.clicked.connect(self.clear_output)
 
         # 帮助按钮
         help_btn = QPushButton("显示帮助")
@@ -194,7 +132,7 @@ class VoiceControlWindow(QDialog):
         """)
         close_btn.clicked.connect(self.close)
 
-        layout.addWidget(clear_btn)
+
         layout.addWidget(help_btn)
         layout.addStretch()
         layout.addWidget(close_btn)
@@ -206,14 +144,11 @@ class VoiceControlWindow(QDialog):
         command = self.input_line.text().strip()
 
         if not command:
-            self.output_text.append("错误：请输入有效的指令！")
             return
 
         # 清空输入框
         self.input_line.clear()
 
-        # 记录输入的命令
-        self.output_text.append(f">>> 执行命令: {command}")
 
         # 根据命令执行相应的操作
         if command == "1":
@@ -223,50 +158,46 @@ class VoiceControlWindow(QDialog):
         elif command == "3":
             self.open_multimodal_fusion()
         elif command == "4":
-            self.output_text.append("提示：语音控制窗口已经打开！")
+            print("提示：语音控制窗口已经打开！")
         elif command.lower() == "help":
             self.show_help()
         else:
-            self.output_text.append(f"错误：未知指令 '{command}'")
-            self.output_text.append("请输入 'help' 查看可用指令")
+            print(f"错误：未知指令 '{command}'")
+            print("请输入 'help' 查看可用指令")
 
-        # 滚动到最新内容
-        self.output_text.verticalScrollBar().setValue(
-            self.output_text.verticalScrollBar().maximum()
-        )
 
     def open_visual_model(self):
         """打开视觉模型窗口"""
         try:
             if self.main_window:
                 self.main_window.open_visual_model_window()
-                self.output_text.append("✓ 成功打开视觉模型窗口")
+                print("✓ 成功打开视觉模型窗口")
             else:
-                self.output_text.append("错误：无法访问主窗口功能")
+                print("错误：无法访问主窗口功能")
         except Exception as e:
-            self.output_text.append(f"错误：打开视觉模型窗口失败 - {str(e)}")
+            print(f"错误：打开视觉模型窗口失败 - {str(e)}")
 
     def open_voice_model(self):
         """打开语音模型窗口"""
         try:
             if self.main_window:
                 self.main_window.open_voice_model_window()
-                self.output_text.append("✓ 成功打开语音模型窗口")
+                print("✓ 成功打开语音模型窗口")
             else:
-                self.output_text.append("错误：无法访问主窗口功能")
+                print("错误：无法访问主窗口功能")
         except Exception as e:
-            self.output_text.append(f"错误：打开语音模型窗口失败 - {str(e)}")
+            print(f"错误：打开语音模型窗口失败 - {str(e)}")
 
     def open_multimodal_fusion(self):
         """打开多模态融合窗口"""
         try:
             if self.main_window:
                 self.main_window.open_multimodal_fusion_window()
-                self.output_text.append("✓ 成功打开多模态融合窗口")
+                print("✓ 成功打开多模态融合窗口")
             else:
-                self.output_text.append("错误：无法访问主窗口功能")
+                print("错误：无法访问主窗口功能")
         except Exception as e:
-            self.output_text.append(f"错误：打开多模态融合窗口失败 - {str(e)}")
+            print(f"错误：打开多模态融合窗口失败 - {str(e)}")
 
     def show_help(self):
         """显示帮助信息"""
@@ -281,10 +212,4 @@ help - 显示此帮助信息
 使用方法：
 在输入框中输入指令编号，然后按回车键执行。
         """
-        self.output_text.append(help_text)
-
-    def clear_output(self):
-        """清空输出区域"""
-        self.output_text.clear()
-        self.output_text.append("输出已清空")
-        self.output_text.append("-" * 50)
+        print(help_text)
