@@ -1,0 +1,27 @@
+
+"""
+    本项目的参数配置
+"""
+
+
+# 训练的图像配置
+HEIGHT = 320
+WIDTH = 320
+NUM_CLASSES = 5
+MAX_IMAGE_PIXELS = 1000000000
+
+
+
+# 训练集与验证集的比例
+RATIO = 0.3
+
+
+# 训练时的参数配置
+BATCH_SIZE = 16
+NUM_WORKERS = 16
+MAX_EPOCHS = 100
+LEARNING_RATE = 0.001
+WEIGHT_DECAY = 0.05
+
+
+

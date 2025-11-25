@@ -175,7 +175,8 @@ class VoiceControlWindow(QDialog):
         print(help_text)
 
     # TODO: 获取外部语音的输入，将其转换为文本，传递给self.input_line之类的实现控制
-
+    def listen_audio_convert_text(self):
+        pass
 
 
 
