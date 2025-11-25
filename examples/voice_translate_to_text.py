@@ -1,285 +1,143 @@
+import os
+import sys
+import torch
 import whisper
-import numpy as np
-import pyaudio
-import wave
-import threading
-import time
+import argparse
+from typing import List, Tuple
+import warnings
+warnings.filterwarnings("ignore")
 
-# 全局变量，用于控制录音
-is_recording = False
-audio_frames = []
+class SpeechToTextConverter:
+    def __init__(self, model_size: str = "base", device: str = "cuda" if torch.cuda.is_available() else "cpu"):
+        """
+        初始化语音转文本转换器
+        """
+        self.device = device
+        print(f"使用设备: {device}")
 
+        # 加载whisper模型
+        print("加载Whisper模型...")
+        self.model = whisper.load_model(model_size, device=device)
+        print(f"已加载 {model_size} 模型")
 
-def record_audio():
-    """在后台线程中录制音频"""
-    global is_recording, audio_frames
+    def transcribe_audio(self, audio_path: str, language: str = None) -> str:
+        """
+        将音频文件转换为文本
+        """
+        if not os.path.exists(audio_path):
+            raise FileNotFoundError(f"音频文件不存在: {audio_path}")
 
-    CHUNK = 1024
-    FORMAT = pyaudio.paInt16
-    CHANNELS = 1
-    RATE = 16000
+        print(f"处理音频文件: {audio_path}")
 
-    p = pyaudio.PyAudio()
+        # 转录音频
+        if language:
+            result = self.model.transcribe(audio_path, language=language, fp16=False)
+        else:
+            result = self.model.transcribe(audio_path, fp16=False)
 
-    # 尝试列出音频设备，帮助选择正确的设备索引
-    print("可用的音频设备:")
-    for i in range(p.get_device_count()):
-        dev_info = p.get_device_info_by_index(i)
-        print(f"  设备 {i}: {dev_info['name']} - 最大输入通道: {dev_info['maxInputChannels']}")
+        text = result["text"].strip()
+        print(f"识别结果: {text}")
+        return text
 
-    # 寻找合适的输入设备
-    input_device_index = None
-    for i in range(p.get_device_count()):
-        dev_info = p.get_device_info_by_index(i)
-        if dev_info['maxInputChannels'] > 0:  # 有输入通道的设备
-            input_device_index = i
-            print(f"选择输入设备: {dev_info['name']}")
-            break
+    def process_directory(self, directory_path: str,
+                         output_file: str = None,
+                         language: str = None) -> List[Tuple[str, str]]:
+        """
+        处理目录中的所有音频文件，仅进行语音转文本
+        """
+        # 支持的音频格式
+        audio_extensions = {'.wav', '.mp3', '.m4a', '.flac', '.aac'}
 
-    if input_device_index is None:
-        print("未找到可用的输入设备")
-        return
+        # 获取目录中的所有音频文件
+        audio_files = []
+        for file in os.listdir(directory_path):
+            if any(file.lower().endswith(ext) for ext in audio_extensions):
+                audio_files.append(os.path.join(directory_path, file))
 
-    stream = p.open(format=FORMAT,
-                    channels=CHANNELS,
-                    rate=RATE,
-                    input=True,
-                    input_device_index=input_device_index,
-                    frames_per_buffer=CHUNK)
+        if not audio_files:
+            print(f"在目录 {directory_path} 中未找到音频文件")
+            return []
 
-    print("录音中... (按回车键停止)")
-    audio_frames = []
+        print(f"找到 {len(audio_files)} 个音频文件")
 
-    while is_recording:
-        data = stream.read(CHUNK, exception_on_overflow=False)
-        audio_frames.append(data)
+        results = []
 
-    stream.stop_stream()
-    stream.close()
-    p.terminate()
+        for audio_file in audio_files:
+            try:
+                print(f"\n处理文件: {os.path.basename(audio_file)}")
+                print("-" * 50)
 
+                # 语音转文本
+                transcribed_text = self.transcribe_audio(audio_file, language)
 
-def save_and_transcribe():
-    """保存音频文件并进行转录"""
-    global audio_frames
+                results.append((os.path.basename(audio_file), transcribed_text))
 
-    if not audio_frames:
-        print("没有录制到音频数据")
-        return
+                print(f"✓ 完成: {os.path.basename(audio_file)}")
 
-    # 保存为临时WAV文件
-    filename = "temp_recording.wav"
+            except Exception as e:
+                print(f"✗ 处理文件 {audio_file} 时出错: {str(e)}")
+                continue
 
-    wf = wave.open(filename, 'wb')
-    wf.setnchannels(1)
-    wf.setsampwidth(2)  # 16-bit
-    wf.setframerate(16000)
-    wf.writeframes(b''.join(audio_frames))
-    wf.close()
+        # 保存结果到文件
+        if output_file and results:
+            self.save_results(results, output_file)
 
-    print("音频已保存，开始识别...")
+        return results
 
-    try:
-        # 加载模型 - 你可以根据需要选择不同大小的模型
-        # 可选模型: "tiny", "base", "small", "medium", "large"
-        model = whisper.load_model("base")
+    def save_results(self, results: List[Tuple[str, str]], output_file: str):
+        """保存语音识别结果到文件"""
+        try:
+            with open(output_file, 'w', encoding='utf-8') as f:
+                f.write("语音识别结果\n")
+                f.write("=" * 50 + "\n\n")
 
-        # 进行转录
-        result = model.transcribe(filename, language="zh", task="transcribe")
+                for filename, transcribed_text in results:
+                    f.write(f"文件: {filename}\n")
+                    f.write(f"识别文本: {transcribed_text}\n")
+                    f.write("-" * 50 + "\n")
 
-        print("\n" + "=" * 50)
-        print("识别结果:")
-        print(result["text"])
-        print("=" * 50)
-
-    except Exception as e:
-        print(f"识别过程中出错: {e}")
-
+            print(f"\n结果已保存到: {output_file}")
+        except Exception as e:
+            print(f"保存结果时出错: {str(e)}")
 
 def main():
-    global is_recording
+    parser = argparse.ArgumentParser(description="语音转文本工具")
+    parser.add_argument("--directory", "-d", type=str, required=True,
+                       help="包含音频文件的目录路径")
+    parser.add_argument("--output", "-o", type=str, default="speech_to_text_results.txt",
+                       help="输出文件路径 (默认: speech_to_text_results.txt)")
+    parser.add_argument("--model", "-m", type=str, default="base",
+                       choices=["tiny", "base", "small", "medium", "large"],
+                       help="Whisper模型大小 (默认: base)")
+    parser.add_argument("--language", "-l", type=str, default=None,
+                       help="源语言（例如: zh, en, ja 等，默认: 自动检测）")
 
-    print("=" * 50)
-    print("Whisper 语音识别系统")
-    print("=" * 50)
+    args = parser.parse_args()
 
-    while True:
-        print("\n选项:")
-        print("1. 开始录音")
-        print("2. 退出程序")
+    # 检查目录是否存在
+    if not os.path.exists(args.directory):
+        print(f"错误: 目录 {args.directory} 不存在")
+        sys.exit(1)
 
-        choice = input("请选择 (1/2): ").strip()
+    # 创建语音转文本实例
+    try:
+        converter = SpeechToTextConverter(model_size=args.model)
 
-        if choice == '1':
-            is_recording = True
+        # 处理目录中的所有音频文件
+        results = converter.process_directory(
+            directory_path=args.directory,
+            output_file=args.output,
+            language=args.language
+        )
 
-            # 启动录音线程
-            record_thread = threading.Thread(target=record_audio)
-            record_thread.daemon = True
-            record_thread.start()
+        # 打印摘要
+        print(f"\n{'='*50}")
+        print(f"处理完成! 成功处理 {len(results)} 个文件")
+        print(f"结果保存在: {args.output}")
 
-            # 等待用户停止录音
-            input("")  # 按回车键停止
-
-            is_recording = False
-            time.sleep(0.5)  # 等待录音线程结束
-
-            # 进行转录
-            save_and_transcribe()
-
-        elif choice == '2':
-            print("程序退出，再见！")
-            break
-        else:
-            print("无效选择，请重新输入")
-
+    except Exception as e:
+        print(f"程序执行出错: {str(e)}")
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
-
-
-
-# import whisperx
-# import numpy as np
-# import pyaudio
-# import wave
-# import threading
-# import time
-#
-# # 全局变量
-# is_recording = False
-# audio_frames = []
-# device = "cpu"  # 如果是NVIDIA GPU，可以设置为 "cuda"
-# batch_size = 8
-#
-#
-# def record_audio():
-#     """在后台线程中录制音频"""
-#     global is_recording, audio_frames
-#
-#     CHUNK = 1024
-#     FORMAT = pyaudio.paInt16
-#     CHANNELS = 1
-#     RATE = 16000
-#
-#     p = pyaudio.PyAudio()
-#
-#     # 自动选择输入设备
-#     input_device_index = None
-#     for i in range(p.get_device_count()):
-#         dev_info = p.get_device_info_by_index(i)
-#         if dev_info['maxInputChannels'] > 0:
-#             input_device_index = i
-#             print(f"使用输入设备: {dev_info['name']}")
-#             break
-#
-#     if input_device_index is None:
-#         print("警告: 未找到输入设备，使用默认设备")
-#         input_device_index = None
-#
-#     stream = p.open(format=FORMAT,
-#                     channels=CHANNELS,
-#                     rate=RATE,
-#                     input=True,
-#                     input_device_index=input_device_index,
-#                     frames_per_buffer=CHUNK)
-#
-#     print("录音中... (按回车键停止)")
-#     audio_frames = []
-#
-#     while is_recording:
-#         data = stream.read(CHUNK, exception_on_overflow=False)
-#         audio_frames.append(data)
-#
-#     stream.stop_stream()
-#     stream.close()
-#     p.terminate()
-#
-#
-# def save_and_transcribe():
-#     """保存音频文件并使用WhisperX进行转录"""
-#     global audio_frames
-#
-#     if not audio_frames:
-#         print("没有录制到音频数据")
-#         return
-#
-#     # 保存为临时WAV文件
-#     filename = "temp_recording.wav"
-#
-#     wf = wave.open(filename, 'wb')
-#     wf.setnchannels(1)
-#     wf.setsampwidth(2)
-#     wf.setframerate(16000)
-#     wf.writeframes(b''.join(audio_frames))
-#     wf.close()
-#
-#     print("音频已保存，开始识别...")
-#
-#     try:
-#         # 1. 加载WhisperX模型
-#         model = whisperx.load_model("base", device=device)
-#
-#         # 2. 转录音频
-#         audio = whisperx.load_audio(filename)
-#         result = model.transcribe(audio, batch_size=batch_size, language="zh")
-#
-#         print("\n" + "=" * 60)
-#         print("WhisperX 识别结果:")
-#         print(result["segments"][0]["text"] if result["segments"] else "未识别到内容")
-#         print("=" * 60)
-#
-#         # 如果需要时间戳信息，可以取消下面的注释
-#         # if len(result["segments"]) > 0:
-#         #     print("\n详细时间戳:")
-#         #     for segment in result["segments"]:
-#         #         print(f"  [{segment['start']:.2f}s - {segment['end']:.2f}s]: {segment['text']}")
-#
-#     except Exception as e:
-#         print(f"识别过程中出错: {e}")
-#
-#
-# def main():
-#     global is_recording
-#
-#     print("=" * 50)
-#     print("WhisperX 高性能语音识别系统")
-#     print("=" * 50)
-#
-#     # 显示模型信息
-#     print("使用的模型: base (平衡速度和精度)")
-#     print(f"计算设备: {device}")
-#
-#     while True:
-#         print("\n选项:")
-#         print("1. 开始录音")
-#         print("2. 退出程序")
-#
-#         choice = input("请选择 (1/2): ").strip()
-#
-#         if choice == '1':
-#             is_recording = True
-#
-#             # 启动录音线程
-#             record_thread = threading.Thread(target=record_audio)
-#             record_thread.daemon = True
-#             record_thread.start()
-#
-#             # 等待用户停止录音
-#             input("")  # 按回车键停止
-#
-#             is_recording = False
-#             time.sleep(0.5)
-#
-#             # 进行转录
-#             save_and_transcribe()
-#
-#         elif choice == '2':
-#             print("程序退出，再见！")
-#             break
-#         else:
-#             print("无效选择，请重新输入")
-#
-#
-# if __name__ == "__main__":
-#     main()

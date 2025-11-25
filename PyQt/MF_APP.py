@@ -15,6 +15,11 @@ from visual_model_window import VisualModelWindow
 from voice_model_window import VoiceModelWindow
 
 
+
+
+
+
+
 # 多模态融合主APP类
 class MultimodalFusionAPP(QMainWindow):
     def __init__(self):
@@ -362,6 +367,11 @@ class MultimodalFusionAPP(QMainWindow):
         """打开多模态融合模型推理历史数据分析窗口"""
         # 待实现
         pass
+
+
+
+
+
 
 
 def main():

@@ -19,7 +19,12 @@
     pip3 install pyaudio speechrecognition -i https://pypi.tuna.tsinghua.edu.cn/simple
 
     pip3 install torch torchaudio openai-whisper whisperx
+    
+    pip3 install transformers -i https://pypi.tuna.tsinghua.edu.cn/simple
 
+    pip3 install googletrans -i https://pypi.tuna.tsinghua.edu.cn/simple
+
+    
 ## GUI层面去运行
 
 启动配置好的python虚拟环境，来到项目的PyQt文件夹下，可运行如下命令
