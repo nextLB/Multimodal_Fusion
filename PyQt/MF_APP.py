@@ -13,6 +13,7 @@ import CSS.scroll_css as scroll_css
 
 from visual_model_window import VisualModelWindow
 from voice_model_window import VoiceModelWindow
+from voice_control import VoiceControlWindow
 
 
 
@@ -355,8 +356,9 @@ class MultimodalFusionAPP(QMainWindow):
 
     def open_voice_control_window(self):
         """打开语音控制窗口"""
-        # 待实现
-        pass
+        self.popup_window = VoiceControlWindow(self)
+        self.popup_window.show()
+
 
     def open_multimodal_training_analysis_window(self):
         """打开多模态融合模型训练历史数据分析窗口"""

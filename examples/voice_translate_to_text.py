@@ -102,7 +102,7 @@ class SpeechToTextConverter:
 
 def main():
     parser = argparse.ArgumentParser(description="语音转文本工具")
-    parser.add_argument("--directory", "-d", type=str, required=True,
+    parser.add_argument("--directory", "-d", type=str, default="/home/next_lb/桌面/next/voice/KAGGLE/AUDIO/REAL/",
                        help="包含音频文件的目录路径")
     parser.add_argument("--output", "-o", type=str, default="speech_to_text_results.txt",
                        help="输出文件路径 (默认: speech_to_text_results.txt)")
@@ -121,9 +121,10 @@ def main():
 
     # 创建语音转文本实例
     try:
+        # 初始化语音转文本的类
         converter = SpeechToTextConverter(model_size=args.model)
 
-        # 处理目录中的所有音频文件
+        # 处理目录中的所有音频文件      并获取结果
         results = converter.process_directory(
             directory_path=args.directory,
             output_file=args.output,
