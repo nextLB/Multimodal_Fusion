@@ -13,7 +13,7 @@ import CSS.scroll_css as scroll_css
 
 from visual_model_window import VisualModelWindow
 from voice_model_window import VoiceModelWindow
-from voice_control import VoiceControlWindow
+from voice_control_window import VoiceControlWindow
 
 
 

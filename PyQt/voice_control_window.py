@@ -1,7 +1,12 @@
 
+import sys
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QLabel,
                              QLineEdit, QTextEdit, QPushButton, QGroupBox)
+
+# 导入自定义模块
+sys.path.append('..')
+import CSS.voice_control_css as voice_control_css
 
 
 class VoiceControlWindow(QDialog):
@@ -55,34 +60,14 @@ class VoiceControlWindow(QDialog):
     def create_input_group(self):
         """创建输入区域"""
         group = QGroupBox("指令输入")
-        group.setStyleSheet("""
-            QGroupBox {
-                font-weight: bold;
-                font-size: 16px;
-                margin: 10px;
-                padding: 15px;
-                border: 2px solid #bdc3c7;
-                border-radius: 8px;
-            }
-        """)
+        group.setStyleSheet(voice_control_css.COMMMAND_INPUT)
 
         layout = QVBoxLayout()
 
         # 输入框
         self.input_line = QLineEdit()
         self.input_line.setPlaceholderText("请输入指令编号（如：1、2、3...）然后按回车键")
-        self.input_line.setStyleSheet("""
-            QLineEdit {
-                font-size: 14px;
-                padding: 10px;
-                border: 2px solid #3498db;
-                border-radius: 5px;
-                margin: 10px;
-            }
-            QLineEdit:focus {
-                border-color: #2980b9;
-            }
-        """)
+        self.input_line.setStyleSheet(voice_control_css.INSTRUCTION_NUMBER)
 
         # 连接回车键信号
         self.input_line.returnPressed.connect(self.execute_command)
@@ -98,38 +83,12 @@ class VoiceControlWindow(QDialog):
 
         # 帮助按钮
         help_btn = QPushButton("显示帮助")
-        help_btn.setStyleSheet("""
-            QPushButton {
-                font-size: 14px;
-                padding: 8px 15px;
-                background-color: #3498db;
-                color: white;
-                border: none;
-                border-radius: 5px;
-                margin: 5px;
-            }
-            QPushButton:hover {
-                background-color: #2980b9;
-            }
-        """)
+        help_btn.setStyleSheet(voice_control_css.SHOW_HELP)
         help_btn.clicked.connect(self.show_help)
 
         # 关闭按钮
         close_btn = QPushButton("关闭窗口")
-        close_btn.setStyleSheet("""
-            QPushButton {
-                font-size: 14px;
-                padding: 8px 15px;
-                background-color: #95a5a6;
-                color: white;
-                border: none;
-                border-radius: 5px;
-                margin: 5px;
-            }
-            QPushButton:hover {
-                background-color: #7f8c8d;
-            }
-        """)
+        close_btn.setStyleSheet(voice_control_css.CLOSE_BUTTON)
         close_btn.clicked.connect(self.close)
 
 
@@ -158,7 +117,7 @@ class VoiceControlWindow(QDialog):
         elif command == "3":
             self.open_multimodal_fusion()
         elif command == "4":
-            print("提示：语音控制窗口已经打开！")
+            pass
         elif command.lower() == "help":
             self.show_help()
         else:
@@ -202,14 +161,21 @@ class VoiceControlWindow(QDialog):
     def show_help(self):
         """显示帮助信息"""
         help_text = """
-可用指令列表：
-1 - 打开视觉模型窗口
-2 - 打开语音模型窗口  
-3 - 打开多模态融合窗口
-4 - 语音控制窗口（当前窗口）
-help - 显示此帮助信息
+                    可用指令列表：
+                    1 - 打开视觉模型窗口
+                    2 - 打开语音模型窗口  
+                    3 - 打开多模态融合窗口
+                    4 - 语音控制窗口（当前窗口）
+                    help - 显示此帮助信息
+                    
+                    使用方法：
+                    在输入框中输入指令编号，然后按回车键执行。
+                    """
 
-使用方法：
-在输入框中输入指令编号，然后按回车键执行。
-        """
         print(help_text)
+
+    # TODO: 获取外部语音的输入，将其转换为文本，传递给self.input_line之类的实现控制
+
+
+
+
