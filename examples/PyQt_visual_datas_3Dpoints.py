@@ -261,8 +261,18 @@ class ModernGLWidget(QOpenGLWidget):
             bool: 是否加载成功
         """
         try:
+            # 跳过摘要文件
+            if 'summary' in filename.lower():
+                print(f"跳过摘要文件: {filename}")
+                return False
+
             with open(filename, 'r') as f:
                 data = json.load(f)
+
+            # 检查JSON文件是否包含点云数据
+            if 'points' not in data:
+                print(f"跳过非点云文件: {filename} (不包含'points'字段)")
+                return False
 
             points = np.array(data['points'], dtype=np.float32)
 
@@ -571,9 +581,9 @@ class ModernControlPanel(QWidget):
         self.status_label = QLabel("就绪 - 请加载点云数据")
         self.status_label.setStyleSheet("""
             QLabel {
-                color: #cccccc; 
-                background-color: #2a2a2a; 
-                border-radius: 6px; 
+                color: #cccccc;
+                background-color: #2a2a2a;
+                border-radius: 6px;
                 padding: 10px;
                 font-size: 12px;
             }
@@ -604,7 +614,7 @@ class ModernControlPanel(QWidget):
 
         info_text = """
         • 左键拖动: 旋转视角
-        • 右键拖动: 平移视角  
+        • 右键拖动: 平移视角
         • 鼠标滚轮: 缩放
         • 可单独控制每个点云可见性
         • 支持GPU加速渲染
@@ -872,12 +882,13 @@ class ModernPointCloudVisualizer(QMainWindow):
         self.controlPanel.updateStatus("正在扫描和加载点云数据，请稍候...")
         QApplication.processEvents()  # 更新UI
 
-        # 扫描JSON文件
-        json_files = [f for f in os.listdir(dir_path) if f.endswith('.json')]
+        # 扫描JSON文件，但跳过摘要文件
+        json_files = [f for f in os.listdir(dir_path)
+                     if f.endswith('.json') and 'summary' not in f.lower()]
 
         if not json_files:
-            self.controlPanel.updateStatus("在选定目录中未找到.json文件")
-            QMessageBox.warning(self, "无数据", "在选定目录中未找到.json文件")
+            self.controlPanel.updateStatus("在选定目录中未找到点云数据文件")
+            QMessageBox.warning(self, "无数据", "在选定目录中未找到点云数据文件")
             return
 
         self.controlPanel.updateStatus(f"找到 {len(json_files)} 个点云文件，开始加载...")

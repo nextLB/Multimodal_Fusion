@@ -911,17 +911,17 @@ class PointCloudGenerator:
 
         # 生成各种点云数据（按从大到小的顺序，优化内存使用）
         objects_to_generate = [
-            ("ground_plane", lambda: self.generateGroundPlane(1800000)),
-            ("roads", lambda: self.generateRoadNetwork(100)),  # 减少道路数量避免内存问题
-            ("lakes", lambda: self.generateLake(10)),
-            ("streams", lambda: self.generateStream(10)),  # 减少溪流数量
-            ("farmland", lambda: self.generateFarmland(50, 35000)),
-            ("buildings", lambda: self.generateBuildings(100)),
-            ("windows", lambda: self.generateWindows(80)),  # 减少窗户数量
-            ("bridges", lambda: self.generateBridge(6)),
-            ("trees", lambda: self.generateTrees(800)),
+            ("ground_plane", lambda: self.generateGroundPlane(3600000)),
+            ("roads", lambda: self.generateRoadNetwork(300)),  # 减少道路数量避免内存问题
+            ("lakes", lambda: self.generateLake(50)),
+            ("streams", lambda: self.generateStream(30)),  # 减少溪流数量
+            ("farmland", lambda: self.generateFarmland(50, 50000)),
+            ("buildings", lambda: self.generateBuildings(300)),
+            ("windows", lambda: self.generateWindows(100)),  # 减少窗户数量
+            ("bridges", lambda: self.generateBridge(10)),
+            ("trees", lambda: self.generateTrees(5000)),
             ("traffic_lights", lambda: self.generateTrafficLights(300)),
-            ("clouds", lambda: self.generateClouds(20))
+            ("clouds", lambda: self.generateClouds(50))
         ]
 
         total_points = 0
